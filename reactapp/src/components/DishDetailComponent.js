@@ -69,8 +69,6 @@ import {Card, CardImg, CardText, CardBody, CardTitle} from 'reactstrap';
     const DishDetail =(props) => {
         
         
-        const {dish} = props;
-        
                 return(
                 <div className="container">
                     <div className="row">      
