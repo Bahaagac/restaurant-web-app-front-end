@@ -1,4 +1,6 @@
 import React, {Component} from 'react';
+import { Loading } from './LoadingComponent';
+
 import {Card, CardImg, CardText, CardBody, CardTitle, 
     Breadcrumb, BreadcrumbItem, Button, Label,
     Modal, ModalHeader, ModalBody,Col, Row} from 'reactstrap';
@@ -172,8 +174,27 @@ const minLength = (len) => (val) => val &&  (val.length >= len);
     
     
     const DishDetail =(props) => {
-        
-        
+            
+        if (props.dishesLoading) {
+            return(
+                <div className="container">
+                    <div className="row">            
+                        <Loading/>
+                    </div>
+                </div>
+            );
+        }
+        else if (props.dishesErrMess) {
+            return(
+                <div className="container">
+                    <div className="row">            
+                        <h4>{props.errMess}</h4>
+                    </div>
+                </div>
+            );
+        }
+
+            else if (props.dish != null) {
                 return(
                 <div className="container">
                     <div className="row">
@@ -182,7 +203,7 @@ const minLength = (len) => (val) => val &&  (val.length >= len);
                             <BreadcrumbItem active>{props.dish.name}</BreadcrumbItem>
                         </Breadcrumb>
                         <div className="col-12">
-                            <h3>{props.dish.name}</h3>
+                            <h3>{props.dish.name}</h3>        
                             <hr/>
                         </div>
                     </div>
@@ -198,7 +219,13 @@ const minLength = (len) => (val) => val &&  (val.length >= len);
                         </div>
                     </div>
                 </div>                       
-                )        
+                )
+            }
+            else {
+                return (
+                    <div></div>
+                )
+            }        
     }
         
 
