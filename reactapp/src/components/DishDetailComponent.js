@@ -7,7 +7,7 @@ import {Card, CardImg, CardText, CardBody, CardTitle,
 import {Link} from 'react-router-dom';
 import { Control, LocalForm, Errors} from 'react-redux-form';
 import { baseUrl } from '../shared/baseUrl';
-
+import { FadeTransform, Fade, Stagger} from 'react-animation-components'
 const required = (val) => val && val.length;
 const maxLength = (len) => (val) => !(val) || (val.length <= len);
 const minLength = (len) => (val) => val &&  (val.length >= len);
@@ -45,9 +45,12 @@ const minLength = (len) => (val) => val &&  (val.length >= len);
         render() {
             return (
                 <>
+                <Fade in>
                 <Button  onClick={this.toggleModal} type="button"  outline color="secondary">
                     <span className="fa fa-pencil"  aria-hidden="true" color="secondary"> Submit Comment</span>
+                
                 </Button>
+                </Fade>
                 <Modal isOpen= {this.state.isModalOpen} toggle= {this.toggleModal}>
                 <ModalHeader toggle= {this.toggleModal}>Submit Comment</ModalHeader>
                     <ModalBody>
@@ -117,14 +120,20 @@ const minLength = (len) => (val) => val &&  (val.length >= len);
     function RenderDish({dish}) {
 
         if (dish != null) {
-            return(        
-                <Card>
-                <CardImg top src={baseUrl + dish.image} alt={dish.name} />
-                    <CardBody>
-                        <CardTitle>{dish.name}</CardTitle>
-                        <CardText>{dish.description}</CardText>                                                          
-                    </CardBody>
-                </Card>
+            return( 
+                <FadeTransform
+             in 
+            transformProps={{
+                exitTransform : 'scale(0.5) translateY(-50%)'
+            }}>       
+                    <Card>
+                    <CardImg top src={baseUrl + dish.image} alt={dish.name} />
+                        <CardBody>
+                            <CardTitle>{dish.name}</CardTitle>
+                            <CardText>{dish.description}</CardText>                                                          
+                        </CardBody>
+                    </Card>
+                </FadeTransform>
             
             ) 
         }
@@ -141,27 +150,30 @@ const minLength = (len) => (val) => val &&  (val.length >= len);
         
         
         if(comments != null) {
-            
-            const comment = comments.map( comment => {
+
+            return(
+                <>
+            <Fade in>
+                <h4>Comments</h4>
+            </Fade>
+            <ul className="list-unstyled">
+                <Stagger in>
+                {comments.map((comment) => {
                 
                 return (
-                    
-                    <div key = {comment.id} >
-                        
-                        <ul className="list-unstyled">
-                            <li>{comment.comment}</li>
-                            <li>-- {comment.author}, {new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: '2-digit'}).format(new Date(Date.parse(comment.date)))}</li>
-                        </ul>
-                    </div>
+                <Fade in key={comment.id} >
+                    <li>
+                                <p>{comment.comment}</p>
+                                <p>-- {comment.author} , {new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: '2-digit'}).format(new Date(Date.parse(comment.date)))}</p>
+                    </li>
+                    </Fade>
                 )
-            })
-            return (            
-                  <div>
-                      <h4>Comments</h4>
-                      {comment} 
-                      <CommentForm dishId = {dishId} postComment = {postComment}/>
-                  </div>
-                )
+            })}
+                </Stagger>
+            </ul>
+            <CommentForm dishId = {dishId} postComment = {postComment}/>
+            </>
+            )
         }
 
         else {
@@ -203,8 +215,9 @@ const minLength = (len) => (val) => val &&  (val.length >= len);
                             <BreadcrumbItem><Link to="/menu">Menu</Link></BreadcrumbItem>
                             <BreadcrumbItem active>{props.dish.name}</BreadcrumbItem>
                         </Breadcrumb>
+                        
                         <div className="col-12">
-                            <h3>{props.dish.name}</h3>        
+                                <h3>{props.dish.name}</h3>
                             <hr/>
                         </div>
                     </div>
