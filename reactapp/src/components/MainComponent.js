@@ -6,9 +6,10 @@ import About from './AboutComponent';
 import Header from '../components/HeaderComponent';
 import Footer from '../components/FooterComponent';
 import DishDetail from './DishDetailComponent';
+import Favorites from './FavoriteComponent';
 import { Switch, Route, Redirect, withRouter} from 'react-router-dom';
 import {connect} from 'react-redux';
-import { postComment, postFeedback, fetchDishes, fetchComments, fetchPromos, fetchLeaders } from '../redux/ActionCreators';
+import { postComment, postFeedback, fetchDishes, fetchComments, fetchPromos, fetchLeaders,loginUser, logoutUser, fetchFavorites, postFavorite, deleteFavorite } from '../redux/ActionCreators';
 import { actions} from 'react-redux-form';
 import {TransitionGroup, CSSTransition} from 'react-transition-group';
 
@@ -18,7 +19,9 @@ const mapStateToProps = state => {
       dishes : state.dishes,
       comments : state.comments,
       promotions : state.promotions,
-      leaders : state.leaders
+      leaders : state.leaders,
+      favorites: state.favorites,
+      auth: state.auth
     }
 }
 
@@ -29,7 +32,12 @@ const mapDispatchToProps = dispatch => ({
   fetchComments: () => { dispatch(fetchComments())},
   fetchPromos: () => { dispatch(fetchPromos())},
   fetchLeaders: () => dispatch(fetchLeaders()),
-  resetFeedbackForm : () => { dispatch(actions.reset('feedback'))}
+  resetFeedbackForm : () => { dispatch(actions.reset('feedback'))},
+  loginUser: (creds) => dispatch(loginUser(creds)),
+  logoutUSer: () => dispatch(logoutUser()),
+  fetchFavorites: () => dispatch(fetchFavorites()),
+  postFavorite : (dishId) => dispatch(postFavorite(dishId)),
+  deleteFavorite: (dishId) => dispatch(deleteFavorite(dishId))
 })
 class Main extends Component {
 
@@ -40,6 +48,7 @@ class Main extends Component {
     this.props.fetchComments();
     this.props.fetchPromos();
     this.props.fetchLeaders();
+    this.props.fetchFavorites();
 
   }
 
@@ -48,6 +57,8 @@ class Main extends Component {
 
           const DishWithId = ({match}) => {
             return (
+              this.props.auth.isAuthenticated
+              ?
               <DishDetail 
               dish={this.props.dishes.dishes.filter((dish) => dish.id ===parseInt(match.params.dishId,10))[0]}
               dishesLoading= { this.props.dishes.isLoading}
@@ -56,13 +67,47 @@ class Main extends Component {
               comments = {this.props.comments.comments.filter((comments) => comments.dishId === parseInt(match.params.dishId,10))}
               commentsErrMess = {this.props.comments.errMess} 
 
-              postComment={this.props.postComment}/>
+              postComment={this.props.postComment}
+
+              favorite = {this.props.favorites.favorites.some((dish) => dish._id ===match.params.dishId)}
+              postFavorite={this.props.postFavorite}
+
+              />
+              : 
+
+              <DishDetail 
+              dish={this.props.dishes.dishes.filter((dish) => dish.id ===parseInt(match.params.dishId,10))[0]}
+              dishesLoading= { this.props.dishes.isLoading}
+              dishesErrMess = {this.props.dishes.errMess}
+
+              comments = {this.props.comments.comments.filter((comments) => comments.dishId === parseInt(match.params.dishId,10))}
+              commentsErrMess = {this.props.comments.errMess} 
+
+              postComment={this.props.postComment}
+
+              favorite = {false}
+              postFavorite={this.props.postFavorite} 
+
+              />
             );
           }
 
+          const PrivateRoute = ({ component: Component, ...rest }) => (
+            <Route {...rest} render={(props) => (
+              this.props.auth.isAuthenticated
+                ? <Component {...props} />
+                : <Redirect to={{
+                    pathname: '/home',
+                    state: { from: props.location }
+                  }} />
+            )} />
+          );
+
+          
+
           return (
             <div>
-              <Header/>
+              <Header auth={this.props.auth} loginUser={this.props.loginUser} logoutUser={this.props.logoutUser} />
               <TransitionGroup>
                 <CSSTransition key={this.props.location.key} classNames="page" timeout={300}>
                   <Switch location={this.props.location}>
@@ -91,6 +136,7 @@ class Main extends Component {
 
                     <Route exact path="/menu" component = {() => <Menu dishes= {this.props.dishes}/>} />
                     <Route path="/menu/:dishId" component = {DishWithId} />
+                    <PrivateRoute exact path="/favorites" component={() => <Favorites favorites={this.props.favorites} deleteFavorite={this.props.deleteFavorite} />} />
                     <Route exact path="/contactus" component = {() => <Contact 
                     resetFeedbackForm = {this.props.resetFeedbackForm}
                     postFeedback = {this.props.postFeedback} />} />

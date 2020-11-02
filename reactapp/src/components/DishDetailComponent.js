@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import { Loading } from './LoadingComponent';
 
-import {Card, CardImg, CardText, CardBody, CardTitle, 
+import {Card, CardImg, CardText, CardBody, CardTitle, CardImgOverlay,
     Breadcrumb, BreadcrumbItem, Button, Label,
     Modal, ModalHeader, ModalBody,Col, Row} from 'reactstrap';
 import {Link} from 'react-router-dom';
@@ -39,9 +39,6 @@ const minLength = (len) => (val) => val &&  (val.length >= len);
         }
 
         
-
-
-
         render() {
             return (
                 <>
@@ -69,30 +66,7 @@ const minLength = (len) => (val) => val &&  (val.length >= len);
                                         </Control.select>                                    
                                     </Col>                               
                                 </Row>
-                                <Row className="form-group">
-                                    <Label htmlFor="author" md={2}>Your Name</Label>
-                                    <Col md={10}>
-                                        <Control.text model=".author" 
-                                        id="author" 
-                                        name="author" 
-                                        placeholder="Your Name"
-                                        className="form-control"
-                                        validators = {{
-                                            required,minLength: minLength(3), maxLength : maxLength(15)
-                                        }}
-                                        >
-                                        </Control.text>
-                                        <Errors className="text-danger"
-                                        model=".author"
-                                        show= "touched"
-                                        messages = {{
-                                        required : "Required " ,
-                                        minLength : 'Must be greater than 3 characters ',
-                                        maxLength : 'Must be 15 characters or less '
-                                    }}>                                                                    
-                                    </Errors>
-                                    </Col>
-                                </Row>   
+                                
                                 <Row className="form-group">
                                     <Label htmlFor="comment" md={2}>Comment</Label>
                                     <Col md={10}>
@@ -117,7 +91,7 @@ const minLength = (len) => (val) => val &&  (val.length >= len);
         }
     }
 
-    function RenderDish({dish}) {
+    function RenderDish({dish,favorite, postFavorite}) {
 
         if (dish != null) {
             return( 
@@ -128,6 +102,15 @@ const minLength = (len) => (val) => val &&  (val.length >= len);
             }}>       
                     <Card>
                     <CardImg top src={baseUrl + dish.image} alt={dish.name} />
+                    <CardImgOverlay>
+                        <Button outline color="primary" onClick={() => favorite ? console.log('Already favorite') : postFavorite(dish._id)}>
+                            {favorite ?
+                                <span className="fa fa-heart"></span>
+                                : 
+                                <span className="fa fa-heart-o"></span>
+                            }
+                        </Button>
+                    </CardImgOverlay>
                         <CardBody>
                             <CardTitle>{dish.name}</CardTitle>
                             <CardText>{dish.description}</CardText>                                                          
@@ -161,10 +144,11 @@ const minLength = (len) => (val) => val &&  (val.length >= len);
                 {comments.map((comment) => {
                 
                 return (
-                <Fade in key={comment.id} >
+                <Fade in key={comment._id} >
                     <li>
-                                <p>{comment.comment}</p>
-                                <p>-- {comment.author} , {new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: '2-digit'}).format(new Date(Date.parse(comment.date)))}</p>
+                        <p>{comment.comment}</p>
+                        <p>{comment.rating}</p>
+                        <p>-- {comment.author.firstname} {comment.author.lastname}, {new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: '2-digit'}).format(new Date(Date.parse(comment.date)))}</p>
                     </li>
                     </Fade>
                 )
@@ -223,7 +207,7 @@ const minLength = (len) => (val) => val &&  (val.length >= len);
                     </div>
                     <div className="row">      
                         <div className="col-12 col-md-5 m-1">
-                            <RenderDish dish= {props.dish}/>        
+                            <RenderDish dish= {props.dish} favorite={props.favorite} postFavorite={props.postFavorite}/>        
                                             
                         </div>
                         <div className="col-12 col-md-4 m-1">
