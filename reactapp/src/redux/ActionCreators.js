@@ -46,6 +46,37 @@ export const postComment = (dishId, rating, comment) => (dispatch) => {
         alert('Your comment could not be posted\nError: '+ error.message); })
 }
 
+export const deleteComment = (commentId) => (dispatch) => {
+    const bearer = 'Bearer ' + localStorage.getItem('token');
+    console.log(commentId,"d")
+    return fetch(baseUrl + 'comments/' + commentId, {
+        method: 'DELETE',
+        headers: {
+            'Authorization' : bearer
+        },
+        credentials : 'same-origin'
+    }) 
+    .then(response => {
+        console.log(response,"a")
+
+        if(response.ok) {
+            return response;
+        }
+        else {
+            const error = new Error('Error '+response.status+ ': ' + response.statusText);
+            error.response = response;
+            throw error;
+        }
+    },error => {
+        throw error;
+    })
+    .then(response => response.json())
+    .then(comments =>{console.log('Comment Deleted', comments); dispatch(addComments(comments));})
+    .catch(error => dispatch(commentsFailed(error.message)));
+}
+
+
+
 export const fetchDishes = () => (dispatch) => {
     dispatch(dishesLoading(true));
 
@@ -237,7 +268,7 @@ export const loginError = (message) => {
 }
 
 export const loginUser = (creds) => (dispatch) => {
-    // We dispatch requestLogin to kickoff the call to the API
+
     dispatch(requestLogin(creds))
 
     return fetch(baseUrl + 'users/login', {
@@ -276,6 +307,63 @@ export const loginUser = (creds) => (dispatch) => {
         }
     })
     .catch(error => dispatch(loginError(error.message)))
+};
+
+export const requestSignup = (creds) => {
+    return {
+        type: ActionTypes.SIGNUP_REQUEST,
+        creds
+    }
+}
+  
+export const receiveSignup = (response) => {
+    return {
+        type: ActionTypes.SIGNUP_SUCCESS,
+        token: response.token
+    }
+}
+  
+export const SignupError = (message) => {
+    return {
+        type: ActionTypes.SIGNUP_FAILURE,
+        message
+    }
+}
+
+export const signupUser = (creds) => (dispatch) => {
+    dispatch(requestSignup(creds))
+
+    return fetch(baseUrl + 'users/signup', {
+        method:'POST',
+        headers : {
+            'Content-Type':'application/json'
+        },
+        body: JSON.stringify(creds)
+    })
+    .then(response => {
+        if(response.ok) {
+            return response;
+        } else {
+            const error = new Error('Error +' +response.status+ ': ' +response.statusText);
+            error.response = response;
+            throw error;
+        }
+    },
+    error => {
+        throw error;
+    })
+    .then(response => response.json())
+    .then(response => {
+        if(response.success) {
+            dispatch(receiveSignup(response));
+        }
+        else {
+            const error = new Error('Error '+ response.status);
+            error.response = response;
+            throw error;
+        }
+    })
+    .catch(error => dispatch(SignupError(error.message)))
 };
 
 export const requestLogout = () => {
@@ -332,6 +420,7 @@ export const postFavorite = (dishId) => (dispatch) => {
 export const deleteFavorite = (dishId) => (dispatch) => {
 
     const bearer = 'Bearer ' + localStorage.getItem('token');
+    console.log(dishId,"d")
 
     return fetch(baseUrl + 'favorites/' + dishId, {
         method: "DELETE",
@@ -343,7 +432,8 @@ export const deleteFavorite = (dishId) => (dispatch) => {
     .then(response => {
         if (response.ok) {
           return response;
-        } else {
+        }
+         else {
           var error = new Error('Error ' + response.status + ': ' + response.statusText);
           error.response = response;
           throw error;

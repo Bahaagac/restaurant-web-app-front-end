@@ -10,12 +10,19 @@ class Header extends Component {
         super(props);
         this.state = {
             isNavOpen: false,
-            isModalOpen: false
+            isModalOpen: false,
+            isSignupModalOpen: false
         };
         this.toggleNav = this.toggleNav.bind(this);
+
         this.toggleModal = this.toggleModal.bind(this);
+        this.signupToggleModal = this.signupToggleModal.bind(this);
+
         this.handleLogin = this.handleLogin.bind(this);
         this.handleLogout = this.handleLogout.bind(this);
+
+        this.handleSignup = this.handleSignup.bind(this);
+    
     }
 
     toggleNav() {
@@ -30,13 +37,31 @@ class Header extends Component {
         });
     }
 
+    signupToggleModal() {
+        this.setState({
+            isSignupModalOpen: !this.state.isSignupModalOpen
+        });
+    }
+
+    handleSignup(event) {
+        this.signupToggleModal();
+        this.props.signupUser({
+            firstname: this.firstname.value,
+            lastname : this.lastname.value,
+            username: this.username.value,
+            password: this.password.value,
+            });
+        event.preventDefault();
+    }
+    
+
     handleLogin(event) {
         this.toggleModal();
         this.props.loginUser({username: this.username.value, password: this.password.value});
         event.preventDefault();
-
     }
 
+    
     handleLogout() {
         this.props.logoutUser();
     }
@@ -48,7 +73,7 @@ class Header extends Component {
                     <div className="container">
                         <NavbarToggler onClick={this.toggleNav} />
                         <NavbarBrand className="mr-auto" href="/">
-                            <img src="assets/images/logo.png" height="30" width="41"
+                            <img src="/assets/images/logo.png" height="30" width="41"
                                 alt="Ristorante Con Fusion" />
                         </NavbarBrand>
                         <Collapse isOpen={this.state.isNavOpen} navbar>
@@ -81,7 +106,9 @@ class Header extends Component {
                             </Nav>
                             <Nav className="ml-auto" navbar>
                                 <NavItem>
-                                    { !this.props.auth.isAuthenticated ?
+                                    { !this.props.auth.isAuthenticated 
+                                    ?
+                                    <>
                                         <Button outline onClick={this.toggleModal}>
                                             <span className="fa fa-sign-in fa-lg"></span> Login
                                             {this.props.auth.isFetching ?
@@ -89,6 +116,14 @@ class Header extends Component {
                                                 : null
                                             }
                                         </Button>
+                                        <Button className="ml-4" outline onClick={this.signupToggleModal}>
+                                        <span className="fa fa-sign-in fa-lg"></span> Sign Up
+                                        {this.props.auth.isFetching ?
+                                            <span className="fa fa-spinner fa-pulse fa-fw"></span>
+                                            : null
+                                        }
+                                    </Button>
+                                    </>
                                         :
                                         <div>
                                         <div className="navbar-text mr-3">{this.props.auth.user.username}</div>
@@ -139,6 +174,34 @@ class Header extends Component {
                                 </Label>
                             </FormGroup>
                             <Button type="submit" value="submit" color="primary">Login</Button>
+                        </Form>
+                    </ModalBody>
+                </Modal>
+                <Modal isOpen={this.state.isSignupModalOpen} toggle={this.signupToggleModal}>
+                    <ModalHeader toggle={this.signupToggleModal}>Sign Up</ModalHeader>
+                    <ModalBody>
+                        <Form onSubmit={this.handleSignup}>
+                            <FormGroup>
+                                <Label htmlFor="firstname">Firstname</Label>
+                                <Input type="text" id="firstname" name="firstname"
+                                    innerRef={(input) => this.firstname = input} />
+                            </FormGroup>
+                            <FormGroup>
+                                <Label htmlFor="lastname">Lastname</Label>
+                                <Input type="text" id="lastname" name="lastname"
+                                    innerRef={(input) => this.lastname = input} />
+                            </FormGroup>
+                            <FormGroup>
+                                <Label htmlFor="username">Username</Label>
+                                <Input type="text" id="username" name="username"
+                                    innerRef={(input) => this.username = input} />
+                            </FormGroup>
+                            <FormGroup>
+                                <Label htmlFor="password">Password</Label>
+                                <Input type="password" id="password" name="password"
+                                    innerRef={(input) => this.password = input}  />
+                            </FormGroup>
+                            <Button type="submit" value="submit" color="primary">Sign Up</Button>
                         </Form>
                     </ModalBody>
                 </Modal>

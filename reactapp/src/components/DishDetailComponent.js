@@ -37,14 +37,16 @@ import { FadeTransform, Fade, Stagger } from 'react-animation-components';
 
     }
 
-    function RenderComments({comments, postComment, dishId}) {
+    function RenderComments({comments, postComment, dishId,deleteComment,isAuthenticated}) {
         if (comments != null)
+
             return(
                 <div className="col-12 col-md-5 m-1">
                     <h4>Comments</h4>
                     <ul className="list-unstyled">
                         <Stagger in>
                             {comments.map((comment) => {
+                                console.log(comment._id,"a")
                                 return (
                                     <Fade in key={comment._id}>
                                         <li>
@@ -52,9 +54,24 @@ import { FadeTransform, Fade, Stagger } from 'react-animation-components';
                                         <p>{comment.rating} stars</p>
                                         <p>-- {comment.author.firstname} {comment.author.lastname} , {new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day:'2-digit'}).format(new Date(Date.parse(comment.updatedAt)))}</p>
                                         </li>
+                                        {
+                                        isAuthenticated
+                                        ?
+                                        <>
+                                        <Button outline onClick={() => deleteComment(comment._id)}>
+                                             <span className="fa fa-sign-in fa-lg"></span> Delete Comment                                
+                                         </Button>
+                                         </>
+                                         :
+                                         <></>
+                                        }        
                                     </Fade>
                                 );
                             })}
+                            
+                             
+                            
+                              
                         </Stagger>
                     </ul>
                     <CommentForm dishId={dishId} postComment={postComment} />
@@ -166,7 +183,9 @@ import { FadeTransform, Fade, Stagger } from 'react-animation-components';
                         <RenderDish dish={props.dish} favorite={props.favorite} postFavorite={props.postFavorite} />
                         <RenderComments comments={props.comments}
                             postComment={props.postComment}
-                            dishId={props.dish._id} />
+                            deleteComment={props.deleteComment}
+                            dishId={props.dish._id}
+                            isAuthenticated = {props.isAuthenticated} />
                     </div>
                 </div>
             );
