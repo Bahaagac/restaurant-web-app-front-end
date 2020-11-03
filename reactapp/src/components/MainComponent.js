@@ -69,6 +69,7 @@ class Main extends Component {
     }
 
     const DishWithId = ({match}) => {
+     console.log(this.props.comments.comments)
 
       return(
         this.props.auth.isAuthenticated
@@ -77,15 +78,21 @@ class Main extends Component {
         <DishDetail dish={this.props.dishes.dishes.filter((dish) => dish._id === match.params.dishId)[0]}
           isLoading={this.props.dishes.isLoading}
           errMess={this.props.dishes.errMess}
-          comments={this.props.comments.comments.filter((comment) => comment.dish === match.params.dishId)}
+          
+          comments={
+            
+            this.props.comments.comments.filter((comment) => comment.dish === match.params.dishId)
+            
+          }
           commentsErrMess={this.props.comments.errMess}
           postComment={this.props.postComment}
           deleteComment={this.props.deleteComment}
           isAuthenticated={this.props.auth.isAuthenticated}
+          user = {this.props.auth.user}
 
           favorite={
             
-            this.props.favorites.favorites.dishes.some((dish) => dish._id === match.params.dishId)}
+            ((this.props.favorites.favorites || []).dishes || []).some((dish) => dish._id === match.params.dishId)}
             
           postFavorite={this.props.postFavorite}
           

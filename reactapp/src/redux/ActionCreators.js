@@ -48,7 +48,7 @@ export const postComment = (dishId, rating, comment) => (dispatch) => {
 
 export const deleteComment = (commentId) => (dispatch) => {
     const bearer = 'Bearer ' + localStorage.getItem('token');
-    console.log(commentId,"d")
+
     return fetch(baseUrl + 'comments/' + commentId, {
         method: 'DELETE',
         headers: {
@@ -57,22 +57,32 @@ export const deleteComment = (commentId) => (dispatch) => {
         credentials : 'same-origin'
     }) 
     .then(response => {
-        console.log(response,"a")
 
         if(response.ok) {
             return response;
         }
         else {
-            const error = new Error('Error '+response.status+ ': ' + response.statusText);
-            error.response = response;
-            throw error;
+            if(response.status === 403){
+                const error = new Error('Error '+ response.status+ ': ' + response.statusText);
+                alert('Your can delete only your comments \n' +error.message);
+                error.response = response;
+                throw error;
+
+            }
+            else {
+                const error = new Error('Error '+ response.status+ ': ' + response.statusText);
+                error.response = response;
+                throw error;
+            }            
+            
         }
     },error => {
         throw error;
     })
     .then(response => response.json())
-    .then(comments =>{console.log('Comment Deleted', comments); dispatch(addComments(comments));})
-    .catch(error => dispatch(commentsFailed(error.message)));
+    .then(comment =>{console.log('Comment Deleted', comment); dispatch(commentsSuccess(comment));})
+    .catch(error => dispatch(commentsFailed(error.message)))
+
 }
 
 
@@ -138,6 +148,11 @@ export const fetchComments = () => (dispatch) => {
 export const commentsFailed = (errmess) => ({
     type: ActionTypes.COMMENTS_FAILED,
     payload: errmess
+});
+
+export const commentsSuccess = (comment) => ({
+    type: ActionTypes.COMMENTS_SUCCESS,
+    payload: comment
 });
 
 export const addComments = (comments) => ({
@@ -293,10 +308,9 @@ export const loginUser = (creds) => (dispatch) => {
     .then(response => response.json())
     .then(response => {
         if (response.success) {
-            // If login was successful, set the token in local storage
             localStorage.setItem('token', response.token);
             localStorage.setItem('creds', JSON.stringify(creds));
-            // Dispatch the success action
+
             dispatch(fetchFavorites());
             dispatch(receiveLogin(response));
         }
@@ -420,7 +434,6 @@ export const postFavorite = (dishId) => (dispatch) => {
 export const deleteFavorite = (dishId) => (dispatch) => {
 
     const bearer = 'Bearer ' + localStorage.getItem('token');
-    console.log(dishId,"d")
 
     return fetch(baseUrl + 'favorites/' + dishId, {
         method: "DELETE",
@@ -443,7 +456,7 @@ export const deleteFavorite = (dishId) => (dispatch) => {
             throw error;
       })
     .then(response => response.json())
-    .then(favorites => { console.log('Favorite Deleted', favorites); dispatch(addFavorites(favorites)); })
+    .then(favorite => { console.log('Favorite Deleted', favorite); dispatch(addFavorites(favorite)); })
     .catch(error => dispatch(favoritesFailed(error.message)));
 };
 
