@@ -38,7 +38,6 @@ import { FadeTransform, Fade, Stagger } from 'react-animation-components';
     }
 
     function RenderComments({comments, postComment, dishId,deleteComment,isAuthenticated,user}) {
-      console.log(comments,"a")
         if (comments != null )
        
             return(

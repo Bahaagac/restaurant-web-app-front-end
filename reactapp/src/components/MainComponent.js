@@ -69,7 +69,6 @@ class Main extends Component {
     }
 
     const DishWithId = ({match}) => {
-     console.log(this.props.comments.comments)
 
       return(
         this.props.auth.isAuthenticated

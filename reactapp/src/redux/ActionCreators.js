@@ -31,12 +31,12 @@ export const postComment = (dishId, rating, comment) => (dispatch) => {
             return response;
         }
         else {
-            var error = new Error('Error ' + response.status + ': ' + response.statusText);
+            var error = new Error(response.status + ': ' + response.statusText);
             error.response = response;
             throw error;
         }
     },
-    error => {
+    error =>  {
         var errmess = new Error(error.message);
         throw errmess;
     })
@@ -55,32 +55,24 @@ export const deleteComment = (commentId) => (dispatch) => {
             'Authorization' : bearer
         },
         credentials : 'same-origin'
-    }) 
+    })
     .then(response => {
 
         if(response.ok) {
             return response;
         }
-        else {
-            if(response.status === 403){
-                const error = new Error('Error '+ response.status+ ': ' + response.statusText);
-                alert('Your can delete only your comments \n' +error.message);
-                error.response = response;
-                throw error;
-
-            }
-            else {
-                const error = new Error('Error '+ response.status+ ': ' + response.statusText);
-                error.response = response;
-                throw error;
-            }            
+        else {            
+            const error = new Error('Error '+ response.status+ ': ' + response.statusText);
+            error.response = response;
+            throw error;
+                      
             
         }
     },error => {
         throw error;
     })
     .then(response => response.json())
-    .then(comment =>{console.log('Comment Deleted', comment); dispatch(commentsSuccess(comment));})
+    .then(comment =>{console.log('Comment Deleted', comment); dispatch(fetchComments());})
     .catch(error => dispatch(commentsFailed(error.message)))
 
 }
@@ -235,7 +227,7 @@ export const addLeaders = (leaders) => ({
 });
 
 export const postFeedback = (feedback) => (dispatch) => {
-        
+    console.log(feedback)
     return fetch(baseUrl + 'feedback', {
         method: "POST",
         body: JSON.stringify(feedback),
@@ -257,7 +249,7 @@ export const postFeedback = (feedback) => (dispatch) => {
             throw error;
       })
     .then(response => response.json())
-    .then(response => { console.log('Feedback', response); alert('Thank you for your feedback!\n'+JSON.stringify(response)); })
+    .then(response => { console.log('Feedback', response); alert('Thank you for your feedback!\n'); })
     .catch(error =>  { console.log('Feedback', error.message); alert('Your feedback could not be posted\nError: '+error.message); });
 };
 
@@ -293,11 +285,13 @@ export const loginUser = (creds) => (dispatch) => {
         },
         body: JSON.stringify(creds)
     })
+    .then(response => response.json())
     .then(response => {
-        if (response.ok) {
+        if (response.success) {
             return response;
         } else {
-            var error = new Error('Error ' + response.status + ': ' + response.statusText);
+            alert('Error: ' + response.err.message)
+            var error = new Error('Error: ' + response.status + ': ' + response.err.message);
             error.response = response;
             throw error;
         }
@@ -305,7 +299,7 @@ export const loginUser = (creds) => (dispatch) => {
         error => {
             throw error;
         })
-    .then(response => response.json())
+
     .then(response => {
         if (response.success) {
             localStorage.setItem('token', response.token);
@@ -354,19 +348,19 @@ export const signupUser = (creds) => (dispatch) => {
         },
         body: JSON.stringify(creds)
     })
+    .then(response => response.json())
     .then(response => {
-        if(response.ok) {
+        if(response.success) {
             return response;
         } else {
-            const error = new Error('Error +' +response.status+ ': ' +response.statusText);
-            error.response = response;
-            throw error;
+            console.log(response)
+            alert('Error: ' + response.message)
+            
         }
     },
     error => {
         throw error;
     })
-    .then(response => response.json())
     .then(response => {
         if(response.success) {
             dispatch(receiveSignup(response));
@@ -374,6 +368,7 @@ export const signupUser = (creds) => (dispatch) => {
         else {
             const error = new Error('Error '+ response.status);
             error.response = response;
+
             throw error;
         }
     })
